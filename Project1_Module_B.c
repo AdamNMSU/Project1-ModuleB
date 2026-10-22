@@ -1,4 +1,12 @@
-#include "Project1_Module_B.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <time.h>
+
+#include "Project1_Module_B.h"   
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -22,15 +30,47 @@ int main(int argc, char *argv[]) {
      * 
      * Hint: Google shmget() and shmat()
      */
-
+    //Unique key identifier for region 1
+    key_t key1 = 0x1234;
+    //initalize matrix size
+    size_t matrix_size = (size_t)ROWS_COUNT * COLUMN_COUNT * sizeof(int);
+    //create key if missing in parrent
+    int shmid1 = shmget(key1, matrix_size, IPC_CREAT | 0666);
+    //error handling
+    if (shmid1 < 0) {
+        printf("Error with smget matrix");
+        exit(1);
+    }
+    //initalize marix, with error handling
+    int *matrix = (int *)shmat(shmid1, NULL, 0);
+    if(matrix == (int*) -1){
+        printf("Error with shmat matrix");
+        exit(1);
+    }
+    //parrent process initalized with shared memory region 1 stored matrix
 
     /* ToDo2
      * create and attach shared memory region 2 to store the partial sums that
      * are returned by children processes.
+    
      */
+     //unique key identifier for region 2
+    key_t key2 = 0x5678;
+    //partial sums bytes
+    size_t sums_bytes = (size_t)num_processes * sizeof(long);
+    int shmid2 = shmget(key2, sums_bytes, IPC_CREAT | 0666);
+    if(shmid2 < 0)
+    {
+        printf("Error with smghet key2 partial sums");
+        exit(1);
+    }
 
-
-
+    long *partial_sums = (long *)shmat(shmid2, NULL, 0);
+    if(partial_sums == (long*)-1){
+        printf("Error with shmat key2 partial sums");
+        exit(1);
+    }
+    //partial sums initialized in memory region 2
 
     /* ToDo3
      * Initialize the shared memory region 1 to hold
@@ -41,6 +81,14 @@ int main(int argc, char *argv[]) {
      * Hint: Treat starting address of shared memory region as first
      * elemnt of a 2D matrix i.e.,  matrix[0][0]
     */
+
+    for(int i = 0; i < ROWS_COUNT; i++)
+    {
+        for(int j = 0; j < COLUMN_COUNT; j++)
+        {
+            matrix[i * COLUMN_COUNT + j] = i + j;
+        }
+    }
 
 
     clock_gettime(CLOCK_REALTIME, &start);
