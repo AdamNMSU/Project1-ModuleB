@@ -102,6 +102,10 @@ int main(int argc, char *argv[]) {
      * Wait for all children processes to complete
     */
 
+	for (int i = 0; i < launched; i++) {
+      	  wait(NULL);
+    	}
+
 
 
     /* ToDo6:
