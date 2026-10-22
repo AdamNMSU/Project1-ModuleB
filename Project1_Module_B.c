@@ -113,6 +113,12 @@ int main(int argc, char *argv[]) {
      * and print the sum.
     */
 
+    long total = 0;
+    for (int i = 0; i < num_processes; i++) {
+        total += partial_sums[i];
+    }
+    printf("Total sum: %ld\n", total);
+
 
     clock_gettime(CLOCK_REALTIME, &end);
     // Calculate execution time
