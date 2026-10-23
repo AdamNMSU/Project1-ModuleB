@@ -107,6 +107,42 @@ int main(int argc, char *argv[]) {
      * Google "man fork" and "man execlp"
      *
     */
+	    /* Rows are split as evenly as possible: the first (ROWS_COUNT % P) children
+     * get one extra row, so every row is covered even if P does not divide M.
+     * Child args: start_row end_row(inclusive) shmid_matrix shmid_sums index */
+    int base_rows = ROWS_COUNT / num_processes;
+    int extra_rows = ROWS_COUNT % num_processes;
+    int next_row = 0;
+    int launched = 0;
+
+    for (int i = 0; i < num_processes; i++) {
+        int rows = base_rows + (i < extra_rows ? 1 : 0);
+        if (rows == 0) break;               /* more processes than rows */
+        int start_row = next_row;
+        int end_row = next_row + rows - 1;
+        next_row += rows;
+
+        char a1[16], a2[16], a3[16], a4[16], a5[16];
+        snprintf(a1, sizeof a1, "%d", start_row);
+        snprintf(a2, sizeof a2, "%d", end_row);
+        snprintf(a3, sizeof a3, "%d", shmid_matrix);
+        snprintf(a4, sizeof a4, "%d", shmid_partial_sum);
+        snprintf(a5, sizeof a5, "%d", i);
+
+        pid_t pid = fork();
+        if (pid < 0) {
+            perror("fork");
+            break;
+        }
+        if (pid == 0) {
+            execlp("./child", "child", a1, a2, a3, a4, a5, (char *)NULL);
+            perror("execlp");               /* only reached if exec fails */
+            _exit(1);
+        }
+        launched++;
+    }
+
+	
 
 
 
@@ -114,12 +150,22 @@ int main(int argc, char *argv[]) {
      * Wait for all children processes to complete
     */
 
+	for (int i = 0; i < launched; i++) {
+      	  wait(NULL);
+    	}
+
 
 
     /* ToDo6:
      * Sum all the partial-sums stored in sharred memory region 2 (by children processes)
      * and print the sum.
     */
+
+    long total = 0;
+    for (int i = 0; i < num_processes; i++) {
+        total += partial_sums[i];
+    }
+    printf("Total sum: %ld\n", total);
 
 
     clock_gettime(CLOCK_REALTIME, &end);
