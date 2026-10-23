@@ -182,6 +182,23 @@ int main(int argc, char *argv[]) {
      * Google "man shmdt" and "man shmctl"
     */
 
+	if (shmdt(matrix) == -1){
+		  perror("ERROR: SHMDT MATRIX");
+		 //_exit(1);
+	}//end of if
+
+	if (shmdt(partial_sums) == -1){
+		perror("ERROR: SHMDT PARTIAL SUMS");
+	}//end of if
+
+	if (shmctl(shmid1, IPC_RMID, NULL) == -1){
+		perror("ERROR: SHMCTL REMOVE MATRIX");
+	}//end of if
+
+	if (shmctl(shmid2, IPC_RMID, NULL) == -1){
+		perror("ERROR: SHMCTL REMOVE PARTIAL SUMS");
+	}//end of if
+
 
 
 
