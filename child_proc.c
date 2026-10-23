@@ -31,7 +31,25 @@ int main(int argc, char *argv[]) {
      * Attach memory region 1
     */
 
+	
+    int(*matrix)[COLUMN_COUNT]=shmat(shmid_matrix, NULL, 0);
+    if(matrix == (void *)-1){
+    	perror("SHMAT: MATRIX");
+	return 1;
+    }//end of if
+    
 
+    long *partial_sum = shmat (shmid_partial_sum, NULL, 0);
+	if (partial_sum == (void *)-1){
+		perror("SHMAT: PARTIAL SUM");
+		shmdt(matrix);
+		return 1;
+	}//end of if
+
+     partial_sum[partial_sum_index] = sum_matrix(start_row_id, end_row_id, (int *)matrix);
+
+     shmdt(partial_sum);
+     shmdt(matrix);
 
     exit(0);
 }
