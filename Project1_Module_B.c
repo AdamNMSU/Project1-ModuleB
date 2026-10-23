@@ -125,8 +125,8 @@ int main(int argc, char *argv[]) {
         char a1[16], a2[16], a3[16], a4[16], a5[16];
         snprintf(a1, sizeof a1, "%d", start_row);
         snprintf(a2, sizeof a2, "%d", end_row);
-        snprintf(a3, sizeof a3, "%d", shmid_matrix);
-        snprintf(a4, sizeof a4, "%d", shmid_partial_sum);
+        snprintf(a3, sizeof a3, "%d", shmid1);
+        snprintf(a4, sizeof a4, "%d", shmid2);
         snprintf(a5, sizeof a5, "%d", i);
 
         pid_t pid = fork();
